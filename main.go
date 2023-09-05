@@ -2,27 +2,22 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"repoReady/utils"
 )
 
 func main() {
 	var projectName string
 
-	fmt.Print("Enter new project name: ")
-	_, err := fmt.Scan(&projectName)
-
+	projectName, err := utils.TakeInputFromUser("Enter new project name: ", true)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Error in taking input:", err)
 		return
 	}
 
-	err = os.Mkdir(projectName, 0755)
-
+	_, err = utils.CreateFolder(projectName)
 	if err != nil {
-        	fmt.Println("Error:", err)
-       	 	return
-    	}
-	
-	fmt.Println("Creating project", projectName)
-}
+		fmt.Println("Error in creating folder:", err)
+		return
+	}
 
+}
