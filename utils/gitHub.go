@@ -10,7 +10,7 @@ import (
 
 type Result struct {
 	HtmlUrl string `json:"html_url"`
-	GitUrl  string `json:"git_url"`
+	GitUrl  string `json:"clone_url"`
 	SshUrl  string `json:"ssh_url"`
 	Owner   struct {
 		Login string `json:"login"`

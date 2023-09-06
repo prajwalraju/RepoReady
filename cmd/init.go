@@ -29,7 +29,7 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		repoInput := utils.RepoInput{}
+		repoInput := utils.RepoInput{Name: args[0]}
 
 		// Create folder with the given name
 		folderName := args[0]
@@ -75,7 +75,7 @@ var initCmd = &cobra.Command{
 
 			topicsArr := []string{}
 			if topics != "" {
-				strings.Split(topics, ",")
+				topicsArr = strings.Split(topics, ",")
 			}
 
 			// Option to make repo private
@@ -111,6 +111,14 @@ var initCmd = &cobra.Command{
 				}
 			}
 
+			// Add remote
+			remoteUrlOption, err := utils.TakeOptionInput("Prefered remote Url option", false, []string{"Https", "SSH"})
+
+			if err != nil {
+				fmt.Println("Error in taking remote Url option :", err)
+				return
+			}
+			utils.AddRemote(remoteUrlOption, repoInput)
 		}
 
 		// Check if user wants to push the repo to github
@@ -125,6 +133,14 @@ var initCmd = &cobra.Command{
 			err = utils.GenerateReadme(folderName, repoInput)
 			if err != nil {
 				fmt.Println("Error in generating readme:", err)
+				return
+			}
+		}
+
+		// Check if user wants to push the repo to github
+		if githubPush == "Yes" {
+			if err = utils.CommitAndPushToRemote(repoInput); err != nil {
+				fmt.Println("Error in committing and pushing to remote:", err)
 				return
 			}
 		}

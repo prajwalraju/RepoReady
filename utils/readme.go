@@ -19,7 +19,7 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 	}
 	defer file.Close()
 
-	if repoInput.Name == "" {
+	if repoInput.Description == "" {
 		if repoInput, err = CollectAllInfo(); err != nil {
 			fmt.Println("Error in taking inputs:", err)
 			return err
@@ -48,7 +48,7 @@ func CollectAllInfo() (RepoInput, error) {
 	repoInput := RepoInput{}
 
 	// Option to add description
-	name, err := TakeInput("Name", false, "")
+	name, err := TakeInput("Name of repo", false, "")
 
 	if err != nil {
 		fmt.Println("Error in taking description input:", err)
