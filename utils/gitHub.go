@@ -9,7 +9,7 @@ import (
 )
 
 type Result struct {
-	HTMLURL string `json:"html_url"`
+	HtmlUrl string `json:"html_url"`
 }
 
 type RepoInput struct {
@@ -20,8 +20,6 @@ type RepoInput struct {
 	Topics      []string `json:"topics"`
 	Owner       string   `json:"owner"`
 }
-
-var gitHubToken string = "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"
 
 func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 
@@ -43,7 +41,7 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 		return result, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+gitHubToken)
+	req.Header.Add("Authorization", "Bearer "+GetEnvVar("GITHUB_TOKEN"))
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -61,11 +59,17 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 			fmt.Println(err)
 			return result, err
 		}
-		fmt.Println("Repository url :", result.HTMLURL)
+		fmt.Println("Repository url :", result.HtmlUrl)
 		return result, nil
 	}
 
 	// Error API handling
+
+	if res.StatusCode == 401 {
+		UserUnauth()
+		return result, errors.New("user not authenticated")
+	}
+
 	type ErrorResponse struct {
 		ErrorsList []struct {
 			Message string `json:"message"`
@@ -107,7 +111,7 @@ func UpdateTopics(repoInput RepoInput) error {
 		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+gitHubToken)
+	req.Header.Add("Authorization", "Bearer "+GetEnvVar("GITHUB_TOKEN"))
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -119,8 +123,18 @@ func UpdateTopics(repoInput RepoInput) error {
 	fmt.Println("Github UpdateTopics returned :", res.StatusCode)
 
 	if res.StatusCode != 200 {
-		return errors.New("Error in updating topics")
+		if res.StatusCode == 401 {
+			UserUnauth()
+			return errors.New("user not authenticated")
+		}
+		return errors.New("error in updating topics")
 	}
 
 	return nil
+}
+
+func UserUnauth() {
+	fmt.Println("You are not authenticated. \n" +
+		"Please visit https://github.com/settings/tokens?type=beta to generate a new token.\n" +
+		"Then run the command 'export GITHUB_TOKEN=<GithubToken>' to add the token.")
 }

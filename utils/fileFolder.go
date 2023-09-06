@@ -28,11 +28,19 @@ func CreateFolder(fileName string) (bool, error) {
 }
 
 func RunGitInit(fileName string) error {
-	if fileName == "" || len(fileName) == 0 || fileName == " " {
-		return errors.New("file name cannot be empty")
+
+	return RunCommand("git", []string{"init"}, fileName)
+}
+
+func RunCommand(command string, args []string, dir string) error {
+	if command == "" || len(command) == 0 || command == " " {
+		return errors.New("command cannot be empty")
 	}
-	cmd := exec.Command("git", "init")
-	cmd.Dir = fileName
+	fmt.Println("Running command", command, args)
+	cmd := exec.Command(command, args...)
+	if dir != "" {
+		cmd.Dir = dir
+	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -77,4 +85,8 @@ func TakeOptionInput(fieldName string, checkIfEmpty bool, options []string) (str
 
 	return result, nil
 
+}
+
+func GetEnvVar(key string) string {
+	return os.Getenv(key)
 }
