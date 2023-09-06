@@ -16,7 +16,6 @@ func CreateFolder(fileName string) (bool, error) {
 	}
 
 	// 0755 is the default permission mode for directories
-	fmt.Println("Creating folder", fileName)
 	err := os.Mkdir(fileName, 0755)
 
 	if err != nil {
@@ -36,7 +35,7 @@ func RunCommand(command string, args []string, dir string) error {
 	if command == "" || len(command) == 0 || command == " " {
 		return errors.New("command cannot be empty")
 	}
-	fmt.Println("Running command", command, args)
+
 	cmd := exec.Command(command, args...)
 	if dir != "" {
 		cmd.Dir = dir
@@ -89,4 +88,11 @@ func TakeOptionInput(fieldName string, checkIfEmpty bool, options []string) (str
 
 func GetEnvVar(key string) string {
 	return os.Getenv(key)
+}
+
+func writeToFile(file *os.File, content string) error {
+	if _, err := fmt.Fprintln(file, content); err != nil {
+		return err
+	}
+	return nil
 }

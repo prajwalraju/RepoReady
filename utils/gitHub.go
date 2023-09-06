@@ -10,15 +10,22 @@ import (
 
 type Result struct {
 	HtmlUrl string `json:"html_url"`
+	GitUrl  string `json:"git_url"`
+	SshUrl  string `json:"ssh_url"`
+	Owner   struct {
+		Login string `json:"login"`
+	} `json:"owner"`
 }
 
 type RepoInput struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Private     bool     `json:"private"`
-	HasWiki     bool     `json:"has_wiki"`
 	Topics      []string `json:"topics"`
-	Owner       string   `json:"owner"`
+	Owner       string
+	HtmlUrl     string
+	GitUrl      string
+	SshUrl      string
 }
 
 func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
@@ -59,7 +66,7 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 			fmt.Println(err)
 			return result, err
 		}
-		fmt.Println("Repository url :", result.HtmlUrl)
+		fmt.Println("Visit the remote repo by clicking this ", result.HtmlUrl)
 		return result, nil
 	}
 
@@ -91,7 +98,7 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 
 func UpdateTopics(repoInput RepoInput) error {
 
-	url := "https://api.github.com/repos/prajwalraju/" + repoInput.Name + "/topics"
+	url := "https://api.github.com/repos/" + repoInput.Owner + "/" + repoInput.Name + "/topics"
 
 	payload := map[string]interface{}{
 		"names": repoInput.Topics,

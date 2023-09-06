@@ -29,6 +29,8 @@ var initCmd = &cobra.Command{
 			return
 		}
 
+		repoInput := utils.RepoInput{}
+
 		// Create folder with the given name
 		folderName := args[0]
 		_, err := utils.CreateFolder(folderName)
@@ -48,7 +50,7 @@ var initCmd = &cobra.Command{
 		githubPush, err := utils.TakeOptionInput("Push to github with repo name "+folderName, false, []string{"Yes", "No"})
 
 		if err != nil {
-			fmt.Println("Error in taking description input:", err)
+			fmt.Println("Error in taking option to push to github input:", err)
 			return
 		}
 
@@ -71,24 +73,33 @@ var initCmd = &cobra.Command{
 				return
 			}
 
-			topicsArr := strings.Split(topics, ",")
+			topicsArr := []string{}
+			if topics != "" {
+				strings.Split(topics, ",")
+			}
 
 			// Option to make repo private
 			githubPrivate, err := utils.TakeOptionInput("Make github repo private "+folderName, false, []string{"Yes", "No"})
 
 			if err != nil {
-				fmt.Println("Error in taking description input:", err)
+				fmt.Println("Error in taking github private option input:", err)
 				return
 			}
 
 			// Create remote repo
-			repoInput := utils.RepoInput{Name: folderName, Description: desc, Private: githubPrivate == "Yes", HasWiki: true, Topics: topicsArr}
+			repoInput = utils.RepoInput{Name: folderName, Description: desc, Private: githubPrivate == "Yes", Topics: topicsArr}
 			result, err := utils.CreateRemoteRepo(repoInput)
 
 			if err != nil {
 				fmt.Println("Error in creating remote repo:", err)
 				return
 			}
+
+			// Update the repoInput with remote repo details
+			repoInput.Owner = result.Owner.Login
+			repoInput.HtmlUrl = result.HtmlUrl
+			repoInput.GitUrl = result.GitUrl
+			repoInput.SshUrl = result.SshUrl
 
 			// If topics are provided, update the remote repo with topics
 			if len(topicsArr) != 0 {
@@ -100,9 +111,23 @@ var initCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Println("Remote repo created at:", result.HtmlUrl)
 		}
 
+		// Check if user wants to push the repo to github
+		GenerateReadme, err := utils.TakeOptionInput("Generate an Readme file", false, []string{"Yes", "No"})
+
+		if err != nil {
+			fmt.Println("Error in taking Readme file generation input:", err)
+			return
+		}
+
+		if GenerateReadme == "Yes" {
+			err = utils.GenerateReadme(folderName, repoInput)
+			if err != nil {
+				fmt.Println("Error in generating readme:", err)
+				return
+			}
+		}
 	},
 }
 
