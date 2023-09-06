@@ -80,6 +80,11 @@ var initCmd = &cobra.Command{
 
 			fmt.Println("Repo url:", result)
 
+			err = utils.UpdateTopics(repoInput)
+			if err != nil {
+				fmt.Println("Error in updating topics:", err)
+			}
+
 		}
 
 	},
