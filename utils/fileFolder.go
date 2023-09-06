@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
 )
@@ -35,4 +36,45 @@ func RunGitInit(fileName string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func TakeInput(fieldName string, checkIfEmpty bool, def string) (string, error) {
+	validate := func(input string) error {
+		if len(input) == 0 && checkIfEmpty {
+			return errors.New(fieldName + " cannot be empty")
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    fieldName,
+		Validate: validate,
+		Default:  def,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", err
+	}
+
+	return result, nil
+}
+
+func TakeOptionInput(fieldName string, checkIfEmpty bool, options []string) (string, error) {
+	prompt := promptui.Select{
+		Label: fieldName,
+		Items: options,
+	}
+
+	_, result, err := prompt.Run()
+
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return "", err
+	}
+
+	return result, nil
+
 }
