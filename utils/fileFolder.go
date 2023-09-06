@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 // CreateFolder creates a new folder with the given name
@@ -25,20 +26,13 @@ func CreateFolder(fileName string) (bool, error) {
 	return true, nil
 }
 
-// Take input from user with a additional field to check if the input is empty
-func TakeInputFromUser(message string, checkEmpty bool) (string, error) {
-	var input string
-
-	fmt.Print(message)
-	_, err := fmt.Scan(&input)
-
-	if err != nil {
-		return "", err
+func RunGitInit(fileName string) error {
+	if fileName == "" || len(fileName) == 0 || fileName == " " {
+		return errors.New("file name cannot be empty")
 	}
-
-	if checkEmpty && input == "" {
-		return "", errors.New("input cannot be empty")
-	}
-
-	return input, nil
+	cmd := exec.Command("git", "init")
+	cmd.Dir = fileName
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

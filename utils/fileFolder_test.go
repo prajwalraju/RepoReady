@@ -2,13 +2,12 @@ package utils
 
 import (
 	"os"
-	"strings"
 	"testing"
 )
 
 func TestCreateFolder(t *testing.T) {
 
-	folderName := "TestFolder"
+	folderName := "TestFolderCreateFolder"
 	result, err := CreateFolder(folderName)
 
 	if err != nil {
@@ -25,24 +24,64 @@ func TestCreateFolder(t *testing.T) {
 		t.Errorf("Folder dose not exists: %v", err)
 	}
 
-	os.Remove(folderName)
+	err = os.RemoveAll(folderName)
+	if err != nil {
+		t.Errorf("Error in removing folder: %v", err)
+	}
 
 }
 
-func TestTakeInputFromUser(t *testing.T) {
-	SendInput("Test\n", t)
-	input, err := TakeInputFromUser("Enter input: ", true)
+func TestCreateFolderWithEmptyName(t *testing.T) {
+
+	folderName := ""
+	result, err := CreateFolder(folderName)
+
+	if err == nil {
+		t.Errorf("Error in creating folder: %v", err)
+	}
+
+	if result {
+		t.Errorf("Error in creating folder: %v", err)
+	}
+
+}
+
+func TestRunGitInit(t *testing.T) {
+
+	folderName := "TestFolderGit"
+	CreateFolder(folderName)
+	err := RunGitInit(folderName)
 
 	if err != nil {
-		t.Errorf("Error in taking input: %v", err)
+		t.Errorf("Error in initializing git: %v", err)
 	}
 
-	if input == "" {
-		t.Errorf("Input cannot be empty")
+	_, err = os.Stat(folderName)
+
+	if os.IsNotExist(err) {
+		t.Errorf("Folder dose not exists: %v", err)
 	}
+
+	_, err = os.Stat(folderName + "/.git")
+
+	if os.IsNotExist(err) {
+		t.Errorf("Folder dose not exists: %v", err)
+	}
+
+	err = os.RemoveAll(folderName)
+	if err != nil {
+		t.Errorf("Error in removing folder: %v", err)
+	}
+
 }
 
-func SendInput(input string, t *testing.T) {
+func TestRunGitInitWithEmptyName(t *testing.T) {
 
-	rdr := strings.NewReader(input)
+	folderName := ""
+	err := RunGitInit(folderName)
+
+	if err == nil {
+		t.Errorf("Error in initializing git: %v", err)
+	}
+
 }
