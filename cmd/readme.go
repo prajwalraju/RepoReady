@@ -39,7 +39,8 @@ Generats a readme file using a template and adds it to the project.`,
 				return
 			}
 
-			fmt.Println("Readme file content:\n\n")
+			fmt.Println("Readme file content:")
+			fmt.Println()
 
 			fmt.Println(utils.BuildReadmeFileContent(repoInput))
 			return

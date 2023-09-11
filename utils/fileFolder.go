@@ -32,6 +32,10 @@ func RunGitInit(fileName string) error {
 }
 
 func RunCommand(command string, args []string, dir string) error {
+	if dir == "" {
+		return errors.New("dir cannot be empty")
+	}
+
 	if command == "" || len(command) == 0 || command == " " {
 		return errors.New("command cannot be empty")
 	}
