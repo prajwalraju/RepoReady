@@ -8,15 +8,7 @@ import (
 	"net/http"
 )
 
-type Result struct {
-	HtmlUrl string `json:"html_url"`
-	GitUrl  string `json:"clone_url"`
-	SshUrl  string `json:"ssh_url"`
-	Owner   struct {
-		Login string `json:"login"`
-	} `json:"owner"`
-}
-
+// RepoInput is the Object that holds all the info required to create a remote repo
 type RepoInput struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -28,6 +20,17 @@ type RepoInput struct {
 	SshUrl      string
 }
 
+// Result is the Object that holds the response from the Github API to create a remote repo
+type Result struct {
+	HtmlUrl string `json:"html_url"`
+	GitUrl  string `json:"clone_url"`
+	SshUrl  string `json:"ssh_url"`
+	Owner   struct {
+		Login string `json:"login"`
+	} `json:"owner"`
+}
+
+// CreateRemoteRepo creates a remote repo on Github
 func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 
 	var result Result
@@ -47,8 +50,8 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 		fmt.Println(err)
 		return result, err
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+GetEnvVar("GITHUB_TOKEN"))
+
+	setHeaders(req)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -96,6 +99,7 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 	return result, errors.New(errorResponse.ErrorsList[0].Message)
 }
 
+// UpdateTopics updates the topics of a remote repo on Github
 func UpdateTopics(repoInput RepoInput) error {
 
 	url := "https://api.github.com/repos/" + repoInput.Owner + "/" + repoInput.Name + "/topics"
@@ -117,8 +121,7 @@ func UpdateTopics(repoInput RepoInput) error {
 		fmt.Println(err)
 		return err
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+GetEnvVar("GITHUB_TOKEN"))
+	setHeaders(req)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -140,8 +143,121 @@ func UpdateTopics(repoInput RepoInput) error {
 	return nil
 }
 
+type License struct {
+	Key    string `json:"key"`
+	Name   string `json:"name"`
+	SpdxId string `json:"spdx_id"`
+	Url    string `json:"url"`
+	NodeId string `json:"node_id"`
+}
+
+// GetLicenses gets the list of licenses from Github
+func GetLicenses() ([]License, error) {
+	var result []License
+
+	url := "https://api.github.com/licenses"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	if err != nil {
+		fmt.Println(err)
+		return result, err
+	}
+
+	setHeaders(req)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return result, err
+	}
+	defer res.Body.Close()
+
+	fmt.Println("Github GetLicenses returned :", res.StatusCode)
+
+	if res.StatusCode == 200 {
+
+		err = json.NewDecoder(res.Body).Decode(&result)
+		if err != nil {
+			fmt.Println(err)
+			return result, err
+		}
+		return result, nil
+	}
+
+	// Error API handling
+
+	if res.StatusCode == 401 {
+		UserUnauth()
+		return result, errors.New("user not authenticated")
+	}
+
+	return result, errors.New("error occured in getting licenses")
+}
+
+type LicenseBody struct {
+	Body string `json:"body"`
+}
+
+// GetLicenses gets the list of licenses from Github
+func GetLicenseContent(url string) (LicenseBody, error) {
+	var result LicenseBody
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	if err != nil {
+		fmt.Println(err)
+		return result, err
+	}
+
+	setHeaders(req)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return result, err
+	}
+	defer res.Body.Close()
+
+	fmt.Println("Github GetLicenses returned :", res.StatusCode)
+
+	if res.StatusCode == 200 {
+
+		err = json.NewDecoder(res.Body).Decode(&result)
+		if err != nil {
+			fmt.Println(err)
+			return result, err
+		}
+		return result, nil
+	}
+
+	// Error API handling
+
+	if res.StatusCode == 401 {
+		UserUnauth()
+		return result, errors.New("user not authenticated")
+	}
+
+	return result, errors.New("error occured in getting licenses")
+}
+
 func UserUnauth() {
 	fmt.Println("You are not authenticated. \n" +
 		"Please visit https://github.com/settings/tokens?type=beta to generate a new token.\n" +
 		"Then run the command 'export GITHUB_TOKEN=<GithubToken>' to add the token.")
+}
+
+func setHeaders(req *http.Request) *http.Request {
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + GetEnvVar("GITHUB_TOKEN"),
+	}
+
+	for headerName, headerValue := range headers {
+		req.Header.Add(headerName, headerValue)
+	}
+
+	return req
 }

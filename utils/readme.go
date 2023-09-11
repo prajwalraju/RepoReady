@@ -19,11 +19,9 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 	}
 	defer file.Close()
 
-	if repoInput.Description == "" {
-		if repoInput, err = CollectAllInfo(); err != nil {
-			fmt.Println("Error in taking inputs:", err)
-			return err
-		}
+	if repoInput, err = CollectAllInfo(repoInput); err != nil {
+		fmt.Println("Error in taking inputs:", err)
+		return err
 	}
 
 	// Write the content to the file
@@ -44,18 +42,20 @@ func BuildReadmeFileContent(repoInput RepoInput) string {
 	return content
 }
 
-func CollectAllInfo() (RepoInput, error) {
-	repoInput := RepoInput{}
+// CollectAllInfo collects all the info required to create a remote repo
+func CollectAllInfo(repoInput RepoInput) (RepoInput, error) {
 
 	// Option to add description
-	name, err := TakeInput("Name of repo", false, "")
+	if repoInput.Name == "" {
+		name, err := TakeInput("Name of repo", false, "")
 
-	if err != nil {
-		fmt.Println("Error in taking description input:", err)
-		return repoInput, err
+		if err != nil {
+			fmt.Println("Error in taking description input:", err)
+			return repoInput, err
+		}
+
+		repoInput.Name = name
 	}
-
-	repoInput.Name = name
 
 	return repoInput, nil
 }
