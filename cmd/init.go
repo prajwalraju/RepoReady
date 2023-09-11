@@ -29,10 +29,12 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		repoInput := utils.RepoInput{Name: args[0]}
+		repoInput := utils.RepoInput{}
 
 		// Create folder with the given name
 		folderName := args[0]
+		repoInput.Name = folderName
+
 		_, err := utils.CreateFolder(folderName)
 		if err != nil {
 			fmt.Println("Error in creating folder:", err)
@@ -121,7 +123,7 @@ var initCmd = &cobra.Command{
 			utils.AddRemote(remoteUrlOption, repoInput)
 		}
 
-		// Check if user wants to push the repo to github
+		// Check if user wants to generate a readme file
 		GenerateReadme, err := utils.TakeOptionInput("Generate an Readme file", false, []string{"Yes", "No"})
 
 		if err != nil {
@@ -133,6 +135,20 @@ var initCmd = &cobra.Command{
 			err = utils.GenerateReadme(folderName, repoInput)
 			if err != nil {
 				fmt.Println("Error in generating readme:", err)
+				return
+			}
+		}
+
+		// Check if user wants to generate a license file
+		GenerateLicense, err := utils.TakeOptionInput("Generate an License file", false, []string{"Yes", "No"})
+		if err != nil {
+			fmt.Println("Error in taking License file generation input:", err)
+			return
+		}
+
+		if GenerateLicense == "Yes" {
+			if err = utils.GenerateLicense(folderName, ""); err != nil {
+				fmt.Println("Error in generating license:", err)
 				return
 			}
 		}

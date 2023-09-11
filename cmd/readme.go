@@ -33,7 +33,7 @@ Generats a readme file using a template and adds it to the project.`,
 		// If generateFile is false, just print the readme file content
 		if !generateFile {
 
-			repoInput, err := utils.CollectAllInfo()
+			repoInput, err := utils.CollectAllInfo(utils.RepoInput{})
 			if err != nil {
 				fmt.Println("Error in collecting all info:", err)
 				return
@@ -58,5 +58,5 @@ func init() {
 	rootCmd.AddCommand(readmeCmd)
 
 	readmeCmd.Flags().StringP("directory", "d", ".", "Directory to add the readme to (default is current directory)")
-	readmeCmd.Flags().BoolP("generateFile", "g", true, "Generate a readme file with the given name (default is README.md)")
+	readmeCmd.Flags().BoolP("generateFile", "g", true, "Generate a readme file or just print the readme content")
 }
