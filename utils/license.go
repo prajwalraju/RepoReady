@@ -46,7 +46,7 @@ func GenerateLicense(licenseDirectory string, licenseType string) error {
 	}
 	defer file.Close()
 
-	if err = writeToFile(file, licenseContent.Body); err != nil {
+	if err = writeToFile(filePath, licenseContent.Body); err != nil {
 		fmt.Println("Error in writing to file:", err)
 		return err
 	}

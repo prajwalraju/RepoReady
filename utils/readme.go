@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
 )
 
 func GenerateReadme(directory string, repoInput RepoInput) error {
@@ -11,14 +10,7 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 
 	filePath := directory + "/README.md"
 
-	// Open the file for writing (create if it doesn't exist)
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return err
-	}
-	defer file.Close()
-
+	var err error
 	if repoInput, err = CollectAllInfo(repoInput); err != nil {
 		fmt.Println("Error in taking inputs:", err)
 		return err
@@ -26,7 +18,7 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 
 	// Write the content to the file
 	content := BuildReadmeFileContent(repoInput)
-	if err = writeToFile(file, content); err != nil {
+	if err = writeToFile(filePath, content); err != nil {
 		fmt.Println("Error in writing to file:", err)
 		return err
 	}

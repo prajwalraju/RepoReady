@@ -94,7 +94,15 @@ func GetEnvVar(key string) string {
 	return os.Getenv(key)
 }
 
-func writeToFile(file *os.File, content string) error {
+func writeToFile(filePath string, content string) error {
+	// Open the file for writing (create if it doesn't exist)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return err
+	}
+	defer file.Close()
+
 	if _, err := fmt.Fprintln(file, content); err != nil {
 		return err
 	}
