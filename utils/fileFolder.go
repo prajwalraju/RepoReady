@@ -69,7 +69,7 @@ func TakeInput(fieldName string, checkIfEmpty bool, def string) (string, error) 
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		fmt.Println("Prompt failed", err)
 		return "", err
 	}
 
@@ -80,12 +80,33 @@ func TakeOptionInput(fieldName string, checkIfEmpty bool, options []string) (str
 	prompt := promptui.Select{
 		Label: fieldName,
 		Items: options,
+		Templates: &promptui.SelectTemplates{
+			Active:   `{{ "✔" | green | bold }} {{ . | cyan | bold }}`,
+			Inactive: `  {{ . | cyan }}`,
+			Selected: `{{ "` + fieldName + `" | black }}: {{ . | cyan | bold }}`,
+		},
 	}
 
 	_, result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		fmt.Println("Prompt failed", err)
+		return "", err
+	}
+
+	return result, nil
+}
+
+func TakeBoolInput(fieldName string, checkIfEmpty bool) (string, error) {
+	prompt := promptui.Prompt{
+		Label:     fieldName,
+		IsConfirm: true,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		fmt.Println("Prompt failed", err)
 		return "", err
 	}
 

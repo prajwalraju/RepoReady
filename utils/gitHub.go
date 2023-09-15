@@ -60,8 +60,6 @@ func CreateRemoteRepo(repoInput dto.RepoInput) (Result, error) {
 	}
 	defer res.Body.Close()
 
-	fmt.Println("Github CreateRemoteRepo returned :", res.StatusCode)
-
 	if res.StatusCode == 201 {
 
 		err = json.NewDecoder(res.Body).Decode(&result)
@@ -69,7 +67,7 @@ func CreateRemoteRepo(repoInput dto.RepoInput) (Result, error) {
 			fmt.Println(err)
 			return result, err
 		}
-		fmt.Println("Visit the remote repo by clicking this ", result.HtmlUrl)
+		fmt.Println("Remote GitHub repo is created successfully, you can vist by clicking ", result.HtmlUrl)
 		return result, nil
 	}
 
@@ -94,7 +92,7 @@ func CreateRemoteRepo(repoInput dto.RepoInput) (Result, error) {
 		return result, err
 	}
 
-	fmt.Println("Error response :", errorResponse.ErrorsList[0].Message)
+	fmt.Println("Github CreateRemoteRepo returned :", res.StatusCode)
 
 	return result, errors.New(errorResponse.ErrorsList[0].Message)
 }
@@ -130,13 +128,12 @@ func UpdateTopics(repoInput dto.RepoInput) error {
 	}
 	defer res.Body.Close()
 
-	fmt.Println("Github UpdateTopics returned :", res.StatusCode)
-
 	if res.StatusCode != 200 {
 		if res.StatusCode == 401 {
 			UserUnauth()
 			return errors.New("user not authenticated")
 		}
+		fmt.Println("Github UpdateTopics returned :", res.StatusCode)
 		return errors.New("error in updating topics")
 	}
 
@@ -187,8 +184,6 @@ func GetLicenses() ([]License, error) {
 	}
 	defer res.Body.Close()
 
-	fmt.Println("Github GetLicenses returned :", res.StatusCode)
-
 	if res.StatusCode == 200 {
 
 		err = json.NewDecoder(res.Body).Decode(&result)
@@ -206,6 +201,7 @@ func GetLicenses() ([]License, error) {
 		return result, errors.New("user not authenticated")
 	}
 
+	fmt.Println("Github GetLicenses returned :", res.StatusCode)
 	return result, errors.New("error occured in getting licenses")
 }
 
@@ -234,8 +230,6 @@ func GetLicenseContent(url string) (LicenseBody, error) {
 	}
 	defer res.Body.Close()
 
-	fmt.Println("Github GetLicenses returned :", res.StatusCode)
-
 	if res.StatusCode == 200 {
 
 		err = json.NewDecoder(res.Body).Decode(&result)
@@ -253,6 +247,7 @@ func GetLicenseContent(url string) (LicenseBody, error) {
 		return result, errors.New("user not authenticated")
 	}
 
+	fmt.Println("Github GetLicenses returned :", res.StatusCode)
 	return result, errors.New("error occured in getting licenses")
 }
 
