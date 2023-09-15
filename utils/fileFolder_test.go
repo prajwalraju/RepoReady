@@ -7,14 +7,10 @@ import (
 
 func TestCreateFolder(t *testing.T) {
 
+	var err error
 	folderName := "TestFolderCreateFolder"
-	result, err := CreateFolder(folderName)
 
-	if err != nil {
-		t.Errorf("Error in creating folder: %v", err)
-	}
-
-	if !result {
+	if err := CreateFolder(folderName); err != nil {
 		t.Errorf("Error in creating folder: %v", err)
 	}
 
@@ -31,23 +27,20 @@ func TestCreateFolder(t *testing.T) {
 func TestCreateFolderWithEmptyName(t *testing.T) {
 
 	folderName := ""
-	result, err := CreateFolder(folderName)
-
-	if err == nil {
-		t.Errorf("Error in creating folder: %v", err)
-	}
-
-	if result {
+	if err := CreateFolder(folderName); err == nil {
 		t.Errorf("Error in creating folder: %v", err)
 	}
 
 }
 
 func TestRunGitInit(t *testing.T) {
-
+	var err error
 	folderName := "TestFolderGit"
-	CreateFolder(folderName)
-	err := RunGitInit(folderName)
+
+	if err = CreateFolder(folderName); err != nil {
+		t.Errorf("Error in creating folder: %v", err)
+	}
+	err = RunGitInit(folderName)
 
 	if err != nil {
 		t.Errorf("Error in initializing git: %v", err)
@@ -77,10 +70,13 @@ func TestRunGitInitWithEmptyName(t *testing.T) {
 }
 
 func TestRunCommand(t *testing.T) {
-
+	var err error
 	folderName := "TestFolderCommand"
-	CreateFolder(folderName)
-	err := RunCommand("git", []string{"init"}, folderName)
+
+	if err = CreateFolder(folderName); err != nil {
+		t.Errorf("Error in creating folder: %v", err)
+	}
+	err = RunCommand("git", []string{"init"}, folderName)
 
 	if err != nil {
 		t.Errorf("Error in initializing git: %v", err)
@@ -114,7 +110,7 @@ func TestWriteToFile(t *testing.T) {
 	fileName := "TestFile"
 	content := "Test Content"
 	var err error
-	if err = writeToFile(fileName, content); err != nil {
+	if err = WriteToFile(fileName, content); err != nil {
 		t.Errorf("Error in writing to file: %v", err)
 	}
 

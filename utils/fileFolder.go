@@ -3,16 +3,19 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
+
+	"github.com/manifoldco/promptui"
+	"github.com/prajwalraju/RepoReady/dto"
+	"gopkg.in/yaml.v3"
 )
 
 // CreateFolder creates a new folder with the given name
-func CreateFolder(fileName string) (bool, error) {
+func CreateFolder(fileName string) error {
 
 	if fileName == "" || len(fileName) == 0 || fileName == " " {
-		return false, errors.New("file name cannot be empty")
+		return errors.New("file name cannot be empty")
 	}
 
 	// 0755 is the default permission mode for directories
@@ -20,10 +23,10 @@ func CreateFolder(fileName string) (bool, error) {
 
 	if err != nil {
 		fmt.Println("Error in creating folder:", err)
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
 func RunGitInit(fileName string) error {
@@ -90,11 +93,30 @@ func TakeOptionInput(fieldName string, checkIfEmpty bool, options []string) (str
 
 }
 
-func GetEnvVar(key string) string {
-	return os.Getenv(key)
+func GetEnvVar() (dto.Config, error) {
+
+	file, err := os.Open(GetUserHomeDir() + "/.repoready/config.yaml")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return dto.Config{}, err
+	}
+	defer file.Close()
+
+	// Create a decoder to read the YAML data
+	decoder := yaml.NewDecoder(file)
+
+	// Initialize a struct to store the YAML data
+	var config dto.Config
+
+	// Decode the YAML data into the struct
+	if err := decoder.Decode(&config); err != nil {
+		fmt.Println("Failed to decode YAML: %v", err)
+		return dto.Config{}, err
+	}
+	return config, nil
 }
 
-func writeToFile(filePath string, content string) error {
+func WriteToFile(filePath string, content string) error {
 	// Open the file for writing (create if it doesn't exist)
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
@@ -107,4 +129,35 @@ func writeToFile(filePath string, content string) error {
 		return err
 	}
 	return nil
+}
+
+func WriteToFileWithByts(filePath string, content []byte) error {
+	// Open the file for writing (create if it doesn't exist)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.Write(content); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CheckIfFileOrFolderExists(filePath string) bool {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func GetUserHomeDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Println("Error in getting user home directory:", err)
+		return ""
+	}
+	return home
 }

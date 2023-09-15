@@ -1,12 +1,12 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 Prajwal Raju P <prajwalrajup@gmail.com>
 */
 package cmd
 
 import (
 	"fmt"
 
-	"github.com/prajwalraju/RepoReady/utils"
+	"github.com/prajwalraju/RepoReady/impl"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ var licenseCmd = &cobra.Command{
 			return
 		}
 
-		utils.GenerateLicense(directory, licenseType)
+		impl.GenerateLicense(directory, licenseType)
 
 		fmt.Println("license called with licenseType:", licenseType)
 	},

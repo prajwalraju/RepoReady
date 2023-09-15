@@ -5,8 +5,8 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/prajwalraju/RepoReady/utils"
+	"github.com/prajwalraju/RepoReady/dto"
+	"github.com/prajwalraju/RepoReady/impl"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ Generats a readme file using a template and adds it to the project.`,
 		// If generateFile is false, just print the readme file content
 		if !generateFile {
 
-			repoInput, err := utils.CollectAllInfo(utils.RepoInput{})
+			repoInput, err := impl.CollectAllInfo(dto.RepoInput{})
 			if err != nil {
 				fmt.Println("Error in collecting all info:", err)
 				return
@@ -42,13 +42,12 @@ Generats a readme file using a template and adds it to the project.`,
 			fmt.Println("Readme file content:")
 			fmt.Println()
 
-			fmt.Println(utils.BuildReadmeFileContent(repoInput))
+			fmt.Println(impl.BuildReadmeFileContent(repoInput))
 			return
 		}
 
 		// Generate readme file
-		err = utils.GenerateReadme(directory, utils.RepoInput{})
-		if err != nil {
+		if err = impl.GenerateReadme(directory, dto.RepoInput{}); err != nil {
 			fmt.Println("Error in generating readme:", err)
 			return
 		}

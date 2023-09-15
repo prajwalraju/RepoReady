@@ -1,10 +1,12 @@
-package utils
+package impl
 
 import (
 	"fmt"
+	"github.com/prajwalraju/RepoReady/dto"
+	"github.com/prajwalraju/RepoReady/utils"
 )
 
-func GenerateReadme(directory string, repoInput RepoInput) error {
+func GenerateReadme(directory string, repoInput dto.RepoInput) error {
 
 	fmt.Println("Generating readme file")
 
@@ -18,7 +20,7 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 
 	// Write the content to the file
 	content := BuildReadmeFileContent(repoInput)
-	if err = writeToFile(filePath, content); err != nil {
+	if err = utils.WriteToFile(filePath, content); err != nil {
 		fmt.Println("Error in writing to file:", err)
 		return err
 	}
@@ -26,7 +28,7 @@ func GenerateReadme(directory string, repoInput RepoInput) error {
 	return nil
 }
 
-func BuildReadmeFileContent(repoInput RepoInput) string {
+func BuildReadmeFileContent(repoInput dto.RepoInput) string {
 	// Name
 	var content string
 	content += "# " + repoInput.Name + "\n"
@@ -35,11 +37,11 @@ func BuildReadmeFileContent(repoInput RepoInput) string {
 }
 
 // CollectAllInfo collects all the info required to create a remote repo
-func CollectAllInfo(repoInput RepoInput) (RepoInput, error) {
+func CollectAllInfo(repoInput dto.RepoInput) (dto.RepoInput, error) {
 
 	// Option to add description
 	if repoInput.Name == "" {
-		name, err := TakeInput("Name of repo", false, "")
+		name, err := utils.TakeInput("Name of repo", false, "")
 
 		if err != nil {
 			fmt.Println("Error in taking description input:", err)

@@ -1,8 +1,12 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
 
-func AddRemote(remoteUrlOption string, repoInput RepoInput) error {
+	"github.com/prajwalraju/RepoReady/dto"
+)
+
+func AddRemote(remoteUrlOption string, repoInput dto.RepoInput) error {
 
 	commandArgs := []string{"remote", "add", "origin"}
 	if remoteUrlOption == "Https" {
@@ -18,7 +22,7 @@ func AddRemote(remoteUrlOption string, repoInput RepoInput) error {
 	return nil
 }
 
-func CommitAndPushToRemote(repoInput RepoInput) error {
+func CommitAndPushToRemote(repoInput dto.RepoInput) error {
 	if err := RunCommand("git", []string{"add", "-A"}, repoInput.Name); err != nil {
 		fmt.Println("Error in adding files to git:", err)
 		return err

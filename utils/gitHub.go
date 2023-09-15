@@ -6,21 +6,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/prajwalraju/RepoReady/dto"
 )
 
-// RepoInput is the Object that holds all the info required to create a remote repo
-type RepoInput struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Private     bool     `json:"private"`
-	Topics      []string `json:"topics"`
-	Owner       string
-	HtmlUrl     string
-	GitUrl      string
-	SshUrl      string
-}
-
-// Result is the Object that holds the response from the Github API to create a remote repo
+// The above type represents a result object containing URLs and owner information.
+// @property {string} HtmlUrl - The `HtmlUrl` property is a string that represents the URL of the
+// repository's HTML page on GitHub. This URL can be used to view the repository in a web browser.
+// @property {string} GitUrl - The `GitUrl` property is a string that represents the clone URL of a Git
+// repository. This URL can be used to clone the repository using Git commands.
+// @property {string} SshUrl - The `SshUrl` property is a string that represents the SSH URL for
+// cloning the repository.
+// @property Owner - The `Owner` property is a nested struct that contains information about the owner
+// of a repository. It has a single property called `Login`, which represents the username of the
+// owner.
 type Result struct {
 	HtmlUrl string `json:"html_url"`
 	GitUrl  string `json:"clone_url"`
@@ -30,8 +29,9 @@ type Result struct {
 	} `json:"owner"`
 }
 
-// CreateRemoteRepo creates a remote repo on Github
-func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
+// The function `CreateRemoteRepo` creates a remote repository on GitHub using the provided input and
+// returns the result or an error.
+func CreateRemoteRepo(repoInput dto.RepoInput) (Result, error) {
 
 	var result Result
 
@@ -99,8 +99,8 @@ func CreateRemoteRepo(repoInput RepoInput) (Result, error) {
 	return result, errors.New(errorResponse.ErrorsList[0].Message)
 }
 
-// UpdateTopics updates the topics of a remote repo on Github
-func UpdateTopics(repoInput RepoInput) error {
+// The function `UpdateTopics` updates the topics of a GitHub repository using the GitHub API.
+func UpdateTopics(repoInput dto.RepoInput) error {
 
 	url := "https://api.github.com/repos/" + repoInput.Owner + "/" + repoInput.Name + "/topics"
 
@@ -143,6 +143,18 @@ func UpdateTopics(repoInput RepoInput) error {
 	return nil
 }
 
+// The `License` type represents a software license with properties such as key, name, SPDX ID, URL,
+// and node ID.
+// @property {string} Key - The `Key` property represents the unique identifier for the license.
+// @property {string} Name - The "Name" property represents the name of the license.
+// @property {string} SpdxId - SpdxId is a unique identifier for the license, which follows the SPDX
+// (Software Package Data Exchange) specification. It is used to uniquely identify and reference
+// licenses in a standardized way.
+// @property {string} Url - The `Url` property in the `License` struct represents the URL or web
+// address associated with the license. It typically points to a webpage or document that provides more
+// information about the license terms and conditions.
+// @property {string} NodeId - The `NodeId` property is a unique identifier for the license. It is used
+// to identify the license within a system or database.
 type License struct {
 	Key    string `json:"key"`
 	Name   string `json:"name"`
@@ -151,7 +163,8 @@ type License struct {
 	NodeId string `json:"node_id"`
 }
 
-// GetLicenses gets the list of licenses from Github
+// The function `GetLicenses` makes a GET request to the GitHub API to retrieve a list of licenses and
+// returns the result as a slice of `License` structs or an error.
 func GetLicenses() ([]License, error) {
 	var result []License
 
@@ -244,20 +257,30 @@ func GetLicenseContent(url string) (LicenseBody, error) {
 }
 
 func UserUnauth() {
-	fmt.Println("You are not authenticated. \n" +
-		"Please visit https://github.com/settings/tokens?type=beta to generate a new token.\n" +
-		"Then run the command 'export GITHUB_TOKEN=<GithubToken>' to add the token.")
+	fmt.Println("You are not authenticated.\n Please run the command 'repoready config' to config Tokens.")
 }
 
-func setHeaders(req *http.Request) *http.Request {
+func setHeaders(req *http.Request) (*http.Request, error) {
+
+	config, err := GetEnvVar()
+	if err != nil {
+		fmt.Println("Error in reading config file:", err)
+		return req, err
+	}
+
+	if config.Github.Token == "" {
+		UserUnauth()
+		return req, errors.New("user not authenticated")
+	}
+
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": "Bearer " + GetEnvVar("GITHUB_TOKEN"),
+		"Authorization": "Bearer " + config.Github.Token,
 	}
 
 	for headerName, headerValue := range headers {
 		req.Header.Add(headerName, headerValue)
 	}
 
-	return req
+	return req, nil
 }
