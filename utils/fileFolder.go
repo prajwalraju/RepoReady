@@ -110,7 +110,7 @@ func GetEnvVar() (dto.Config, error) {
 
 	// Decode the YAML data into the struct
 	if err := decoder.Decode(&config); err != nil {
-		fmt.Println("Failed to decode YAML: %v", err)
+		fmt.Println("Failed to decode YAML: ", err)
 		return dto.Config{}, err
 	}
 	return config, nil
