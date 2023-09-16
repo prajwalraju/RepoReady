@@ -17,4 +17,5 @@ type RepoInput struct {
 	HtmlUrl     string
 	GitUrl      string
 	SshUrl      string
+	PushToGit   bool
 }
