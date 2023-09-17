@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/prajwalraju/RepoReady/dto"
 	"github.com/prajwalraju/RepoReady/impl"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +30,7 @@ var licenseCmd = &cobra.Command{
 			return
 		}
 
-		impl.GenerateLicense(directory, licenseType)
+		impl.GenerateLicense(dto.RepoInput{Name: directory}, licenseType)
 
 		fmt.Println("license called with licenseType:", licenseType)
 	},

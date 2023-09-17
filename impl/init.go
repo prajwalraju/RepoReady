@@ -43,13 +43,13 @@ func Init(folderName string) {
 		}
 	}
 
-	// Generate readme file in repo if user wants to
-	if err = generateReadme(folderName, repoInput); err != nil {
+	// Generate License file in repo if user wants to
+	if repoInput, err = generateLicense(folderName, repoInput); err != nil {
 		return
 	}
 
-	// Generate License file in repo if user wants to
-	if err = generateLicense(folderName); err != nil {
+	// Generate readme file in repo if user wants to
+	if err = generateReadme(folderName, repoInput); err != nil {
 		return
 	}
 
@@ -103,23 +103,23 @@ func generateReadme(folderName string, repoInput dto.RepoInput) error {
 }
 
 // GenerateLicense generates a license file in the given directory
-func generateLicense(folderName string) error {
+func generateLicense(folderName string, repoInput dto.RepoInput) (dto.RepoInput, error) {
 
 	// Check if user wants to generate a license file
 	GenerateLicenseFlag, err := utils.TakeOptionInput("Generate an License file", false, []string{"Yes", "No"})
 	if err != nil {
 		fmt.Println("Error in taking License file generation input:", err)
-		return err
+		return repoInput, err
 	}
 
 	if GenerateLicenseFlag == "Yes" {
-		if err = GenerateLicense(folderName, ""); err != nil {
+		if repoInput, err = GenerateLicense(repoInput, ""); err != nil {
 			fmt.Println("Error in generating license:", err)
-			return err
+			return repoInput, err
 		}
 	}
 
-	return nil
+	return repoInput, nil
 }
 
 // createRemoteRepo creates a remote repo in github

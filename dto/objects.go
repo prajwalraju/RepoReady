@@ -9,13 +9,17 @@ type Github struct {
 
 // RepoInput is the Object that holds all the info required to create a remote repo
 type RepoInput struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Private     bool     `json:"private"`
-	Topics      []string `json:"topics"`
-	Owner       string
-	HtmlUrl     string
-	GitUrl      string
-	SshUrl      string
-	PushToGit   bool
+	Name            string   `json:"name"`
+	Description     string   `json:"description"`
+	Private         bool     `json:"private"`
+	Topics          []string `json:"topics"`
+	Owner           string
+	HtmlUrl         string
+	GitUrl          string
+	SshUrl          string
+	PushToGit       bool
+	LongDescription string
+	Features        []string
+	License         string
+	Install         string
 }
