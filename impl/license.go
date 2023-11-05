@@ -31,7 +31,7 @@ func GenerateLicense(repoInput dto.RepoInput, licenseType string) (dto.RepoInput
 
 	for _, l := range licenses {
 		if l.SpdxId == licenseType {
-			repoInput.License = l.Name
+			repoInput.StringMetadata["License"] = l.Name
 			licenseContent, error = utils.GetLicenseContent(l.Url)
 			if error != nil {
 				fmt.Println("An error occurred while getting license content", error)

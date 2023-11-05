@@ -134,6 +134,17 @@ func GetEnvVar() (dto.Config, error) {
 		fmt.Println("Failed to decode YAML: ", err)
 		return dto.Config{}, err
 	}
+
+	if len(config.Readme.Template) == 0 {
+		config.Readme.Template = map[string]string{
+			"Name":        "string",
+			"Description": "string",
+			"Features":    "list",
+			"Install":     "string",
+			"License":     "string",
+		}
+	}
+
 	return config, nil
 }
 

@@ -32,24 +32,25 @@ func GenerateReadme(directory string, repoInput dto.RepoInput) error {
 func BuildReadmeFileContent(repoInput dto.RepoInput) string {
 	// Name
 	content := ""
-	concatString(&content, "# "+repoInput.Name)
-	concatString(&content, repoInput.LongDescription)
 
-	if len(repoInput.Features) != 0 {
-		concatString(&content, "# Features")
-		for _, l := range repoInput.Features {
-			concatString(&content, "- "+l)
+	config, err := utils.GetEnvVar()
+	if err != nil {
+		fmt.Println("Error in getting env var:", err)
+		return ""
+	}
+
+	for topic, topicType := range config.Readme.Template {
+		if topicType == "string" {
+			concatString(&content, "# "+topic)
+			concatString(&content, repoInput.Name)
+			concatString(&content, "\n")
+		} else if topicType == "list" {
+			concatString(&content, "# "+topic)
+			for _, l := range repoInput.Features {
+				concatString(&content, "- "+l)
+			}
+			concatString(&content, "\n")
 		}
-	}
-
-	if repoInput.License != "" {
-		concatString(&content, "# License")
-		concatString(&content, repoInput.Name+" is licensed under the "+repoInput.License+" license. See LICENSE for more information.")
-	}
-
-	if repoInput.Install != "" {
-		concatString(&content, "# Install")
-		concatString(&content, repoInput.Install)
 	}
 	return content
 }
@@ -73,8 +74,8 @@ func CollectAllInfo(repoInput dto.RepoInput) (dto.RepoInput, error) {
 	}
 
 	// Option to add description
-	if repoInput.LongDescription, err = utils.TakeInput("Longer Description", false, ""); err != nil || repoInput.LongDescription == "" {
-		repoInput.Description = repoInput.LongDescription
+	if repoInput.StringMetadata["LongDescription"], err = utils.TakeInput("Longer Description", false, ""); err != nil || repoInput.StringMetadata["LongDescription"] == "" {
+		repoInput.Description = repoInput.StringMetadata["LongDescription"]
 	}
 
 	// Option to add Features
@@ -97,10 +98,41 @@ func CollectAllInfo(repoInput dto.RepoInput) (dto.RepoInput, error) {
 		}
 	}
 
-	// Option to add Install
-	if repoInput.Install, err = utils.TakeInput("Install", false, ""); err != nil {
-		fmt.Println("Error in taking install input:", err)
+	config, err := utils.GetEnvVar()
+	if err != nil {
+		fmt.Println("Error in getting env var:", err)
 		return repoInput, err
+	}
+
+	for topic, topicType := range config.Readme.Template {
+
+		if topicType == "string" {
+			if repoInput.Name, err = utils.TakeInput(topic, false, ""); err != nil {
+				fmt.Println("Error in taking description input:", err)
+				return repoInput, err
+			}
+		} else if topicType == "list" {
+			if feature, err := utils.TakeInput(topic, false, ""); err != nil {
+				fmt.Println("Error in taking features input:", err)
+				return repoInput, err
+			} else if feature != "" {
+				repoInput.Features = append(repoInput.Features, feature)
+
+				// whileLoop:
+				// 	for {
+				// 		if feature, err = utils.TakeInput("- ", false, ""); err != nil {
+				// 			fmt.Println("Error in taking features input:", err)
+				// 			return repoInput, err
+				// 		} else if feature != "" {
+				// 			repoInput.Features = append(repoInput.Features, feature)
+				// 		} else {
+				// 			break whileLoop
+				// 		}
+				// 	}
+				// }
+			}
+		}
+		return repoInput, nil
 	}
 
 	return repoInput, nil
